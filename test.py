@@ -15,7 +15,13 @@ def test_single_image(model, img_path, uncertainty=False, device=None):
     if not device:
         device = get_device()
     num_classes = 10
-    trans = transforms.Compose([transforms.Resize((28, 28)), transforms.ToTensor()])
+    trans = transforms.Compose(
+        [
+            transforms.Resize((28, 28)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,)),
+        ]
+    )
     img_tensor = trans(img)
     img_tensor.unsqueeze_(0)
     img_variable = Variable(img_tensor)

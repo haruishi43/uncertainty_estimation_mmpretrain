@@ -31,10 +31,14 @@ def main():
     mode_group.add_argument(
         "--examples", action="store_true", help="To example MNIST data."
     )
+    parser.add_argument("--lr", default=0.001, type=float)
+    parser.add_argument("--optim", default="Adam", type=str)
     parser.add_argument(
         "--epochs", default=10, type=int, help="Desired number of epochs."
     )
-    parser.add_argument("--bs", default=1024, type=int, help="The number of batch size")
+    parser.add_argument(
+        "--bs", default=1000, type=int, help="The number of batch size."
+    )
     parser.add_argument(
         "--dropout", action="store_true", help="Whether to use dropout or not."
     )
@@ -96,15 +100,22 @@ def main():
         else:
             criterion = nn.CrossEntropyLoss()
 
-        # optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=0.005)
-        optimizer = optim.SGD(
-            model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001
-        )
+        if args.optim == "SGD":
+            optimizer = optim.SGD(
+                model.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001
+            )
+        elif args.optim == "Adam":
+            optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=0)
+        elif args.optim == "AdamW":
+            optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.005)
+        else:
+            raise ValueError(f"{args.optim} is not a valid optimizer")
 
         # exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
-        exp_lr_scheduler = optim.lr_scheduler.MultiStepLR(
-            optimizer, milestones=[50], gamma=0.1
-        )
+        # exp_lr_scheduler = optim.lr_scheduler.MultiStepLR(
+        #     optimizer, milestones=[15, 30, 45], gamma=0.1
+        # )
+        exp_lr_scheduler = optim.lr_scheduler.PolynomialLR(optimizer, num_epochs)
 
         device = get_device()
         model = model.to(device)

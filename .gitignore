@@ -163,8 +163,21 @@ cython_debug/
 *.pt
 *.pth
 
-# VS code
+# dev
+.DS_Store
 .vscode
 
-# data
-data/mnist/MNIST
+# project specific
+/work_dirs
+work_dirs/
+tmp_work_dirs/
+.format_cityscapes
+.dist_test
+
+# wandb
+wandb/
+artifacts/
+
+# logging and checkpoints
+logs/
+outputs/

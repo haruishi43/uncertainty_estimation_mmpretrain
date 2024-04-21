@@ -85,12 +85,12 @@ def edl_loss(func, y, alpha, epoch_num, num_classes, annealing_step, device=None
 
     A = torch.sum(y * (func(S) - func(alpha)), dim=1, keepdim=True)
 
-    # annealing_coef = torch.min(
-    #     torch.tensor(1.0, dtype=torch.float32),
-    #     torch.tensor(epoch_num / annealing_step, dtype=torch.float32),
-    # )
+    annealing_coef = torch.min(
+        torch.tensor(1.0, dtype=torch.float32),
+        torch.tensor(epoch_num / annealing_step, dtype=torch.float32),
+    )
 
-    annealing_coef = 0.1
+    # annealing_coef = 0.1
 
     kl_alpha = (alpha - 1) * (1 - y) + 1
     kl_div = annealing_coef * kl_divergence(kl_alpha, num_classes, device=device)
