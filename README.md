@@ -1,5 +1,14 @@
 # Evidential Deep Learning
 
+Experiments for Evidential Deep Learning (EDL)
+
+The paper can be accessed at [arXiv](http://arxiv.org/abs/1806.01768).
+
+The goals of this project are:
+- to reproduce the results of the paper
+- for me to understand how EDL works and the capabilities
+- to adapt EDL for other datasets
+
 ## Installation
 
 Install `torch` (with gpu-support).
@@ -36,6 +45,9 @@ Checkout `notebooks/exp_edl_mnist.ipynb` to visualize the results.
 | Rotate "1" | ![alt text](.readme/rotate_deterministic_model.png) | ![alt text](.readme/rotate_edl_model.png) |
 | Classify "1" | ![alt text](.readme/one_deterministic_model.png) | ![alt text](.readme/one_edl_model.png) |
 | Classify "Yoda" | ![alt text](.readme/yoda_deterministic_model.png) | ![alt text](.readme/yoda_edl_model.png) |
+
+I've noticed that EDL is very sensitive to how it is trained.
+For example, when I used the Adam optimizer for training, the model accuracy improves, but the uncertainty estimates are not as good as when I used SGD.
 
 
 ## Acknowledgement
