@@ -23,7 +23,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=128,
+    batch_size=1000,
     num_workers=2,
     dataset=dict(**common_data_cfg, test_mode=True),
     sampler=dict(type="DefaultSampler", shuffle=False),

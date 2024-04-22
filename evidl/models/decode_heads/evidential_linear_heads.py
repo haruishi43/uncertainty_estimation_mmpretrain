@@ -221,7 +221,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
             # NOTE add uncertainty as a custom filed
             data_sample.set_field(
                 uncert,
-                'uncertainty',
+                "uncertainty",
                 dtype=torch.Tensor,
             )
 
