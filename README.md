@@ -63,7 +63,7 @@ For example, when I used the Adam optimizer for training, the model accuracy imp
 ### Different Evidence Functions
 
 | Evidence Function | Rotated One Experiment |
-| ---------- | -------- | -------- |
+| ---------- | -------- |
 | `relu(x)` | ![alt text](.readme/rotate_relu_model.png) |
 | `exp(x)` (clamped) | ![alt text](.readme/rotate_exp_model.png) |
 | `exp(tanh(x) / tau)` | ![alt text](.readme/rotate_exptanh_model.png) |
