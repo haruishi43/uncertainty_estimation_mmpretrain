@@ -31,7 +31,7 @@ python tools/train.py configs/edl_mnist/edl_lenet5_mnist.py
 
 Checkout `notebooks/exp_edl_mnist.ipynb` to visualize the results.
 
-| Experiment | Softmax  | Evidentail |
+| Experiment | Softmax  | Evidential Deep Learning |
 | ---------- | -------- | -------- |
 | Rotate "1" | ![alt text](.readme/rotate_deterministic_model.png) | ![alt text](.readme/rotate_edl_model.png) |
 | Classify "1" | ![alt text](.readme/one_deterministic_model.png) | ![alt text](.readme/one_edl_model.png) |
