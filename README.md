@@ -16,3 +16,13 @@ mim install "mmpretrain>=1.0.0rc8"
 ```
 
 ## Usage
+
+### MNIST example
+
+```python
+# baseline
+python tools/train.py configs/edl_mnist/default_lenet5_mnist.py
+
+# edl
+python tools/train.py configs/edl_mnist/edl_lenet5_mnist.py
+```
