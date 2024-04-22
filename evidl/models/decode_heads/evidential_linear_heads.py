@@ -75,6 +75,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
         num_classes: int,
         in_channels: int,
         mid_channels: Sequence[int],
+        evidence_func: str = "softplus",
         dropout_rate: float = 0.0,
         norm_cfg: Optional[Dict] = None,
         act_cfg: Optional[Dict] = dict(type="ReLU"),
@@ -93,6 +94,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
         )
         self.mid_channels = mid_channels
 
+        self.evidence_func = evidence_func
         self.dropout_rate = dropout_rate
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
@@ -118,6 +120,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
         self.dirichlet = Dirichlet(
             self.mid_channels[-1],
             self.num_classes,
+            evidence_function=self.evidence_func,
         )
 
     def pre_logits(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
@@ -192,16 +195,19 @@ class EvidentialStackedLinearClsHead(ClsHead):
 
     def _get_predictions(self, alpha, data_samples):
 
-        # this is actually a normalized probability map
-        # similar to softmax
         alpha = alpha.detach()
-        pred_scores = alpha / alpha.sum(dim=1, keepdim=True)
+        S = alpha.sum(dim=1, keepdim=True)
+        # this is actually a normalized probability map
+        # or belief
+        pred_scores = alpha / S
 
-        # do something with uncertainty
-        pred_uncerts = self.num_classes / alpha.sum(dim=1, keepdim=True)
+        # uncertainty
+        pred_uncerts = self.num_classes / S
 
         # predicted labels
-        pred_labels = alpha.argmax(dim=1, keepdim=True).detach()
+        # pred_labels = alpha.argmax(dim=1, keepdim=True).detach()
+        # TODO: softmax prediction?
+        pred_labels = torch.softmax(pred_scores, dim=1)
 
         out_data_samples = []
         if data_samples is None:

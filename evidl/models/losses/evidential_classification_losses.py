@@ -111,7 +111,7 @@ class DirichletNLLLoss(nn.Module):
         lamb = min(1, float(step) / max_steps)
 
         num_classes = alpha.shape[-1]
-        y = F.one_hot(y, num_classes)
+        y = F.one_hot(label, num_classes)
         return dirichlet_mse_loss(alpha, y) + lamb * kl_div_reg(alpha, y)
 
 
@@ -129,5 +129,5 @@ class DirichletDigammaLoss(nn.Module):
         lamb = min(1, float(step) / max_steps)
 
         num_classes = alpha.shape[-1]
-        y = F.one_hot(y, num_classes)
+        y = F.one_hot(label, num_classes)
         return dirichlet_digamma_loss(alpha, y) + lamb * kl_div_reg(alpha, y)
