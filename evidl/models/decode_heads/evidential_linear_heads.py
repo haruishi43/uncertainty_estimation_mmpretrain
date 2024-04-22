@@ -149,21 +149,6 @@ class EvidentialStackedLinearClsHead(ClsHead):
         max_steps: int,
         **kwargs,
     ) -> dict:
-        """Calculate losses from the classification score.
-
-        Args:
-            feats (tuple[Tensor]): The features extracted from the backbone.
-                Multiple stage inputs are acceptable but only the last stage
-                will be used to classify. The shape of every item should be
-                ``(num_samples, num_classes)``.
-            data_samples (List[DataSample]): The annotation data of
-                every samples.
-            **kwargs: Other keyword arguments to forward the loss module.
-
-        Returns:
-            dict[str, Tensor]: a dictionary of loss components
-        """
-        # The part can be traced by torch.fx
         cls_score = self(feats)
 
         # Unpack data samples and pack targets
@@ -201,48 +186,44 @@ class EvidentialStackedLinearClsHead(ClsHead):
         feats: Tuple[torch.Tensor],
         data_samples: Optional[List[Optional[DataSample]]] = None,
     ) -> List[DataSample]:
-        """Inference without augmentation.
-
-        Args:
-            feats (tuple[Tensor]): The features extracted from the backbone.
-                Multiple stage inputs are acceptable but only the last stage
-                will be used to classify. The shape of every item should be
-                ``(num_samples, num_classes)``.
-            data_samples (List[DataSample | None], optional): The annotation
-                data of every samples. If not None, set ``pred_label`` of
-                the input data samples. Defaults to None.
-
-        Returns:
-            List[DataSample]: A list of data samples which contains the
-            predicted results.
-        """
-        # The part can be traced by torch.fx
         alpha = self(feats)
-
-        # The part can not be traced by torch.fx
         predictions = self._get_predictions(alpha, data_samples)
         return predictions
 
     def _get_predictions(self, alpha, data_samples):
-        pred_prob = alpha / alpha.sum(dim=1, keepdim=True)
+
+        # this is actually a normalized probability map
+        # similar to softmax
+        alpha = alpha.detach()
+        pred_scores = alpha / alpha.sum(dim=1, keepdim=True)
 
         # do something with uncertainty
-        # TODO: make a new data_sample with `prob` and `uncertainty`
-        # pred_uncert = self.num_classes / alpha.sum(dim=1, keepdim=True)
+        pred_uncerts = self.num_classes / alpha.sum(dim=1, keepdim=True)
+
+        # predicted labels
         pred_labels = alpha.argmax(dim=1, keepdim=True).detach()
 
         out_data_samples = []
         if data_samples is None:
-            data_samples = [None for _ in range(pred_prob.size(0))]
+            data_samples = [None for _ in range(pred_scores.size(0))]
 
-        for data_sample, prob, label in zip(
+        for data_sample, score, uncert, label in zip(
             data_samples,
-            pred_prob,
+            pred_scores,
+            pred_uncerts,
             pred_labels,
         ):
             if data_sample is None:
                 data_sample = DataSample()
 
-            data_sample.set_pred_score(prob).set_pred_label(label)
+            data_sample.set_pred_score(score).set_pred_label(label)
+
+            # NOTE add uncertainty as a custom filed
+            data_sample.set_field(
+                uncert,
+                'uncertainty',
+                dtype=torch.Tensor,
+            )
+
             out_data_samples.append(data_sample)
         return out_data_samples

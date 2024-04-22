@@ -21,11 +21,11 @@ class EvidentialImageClassifier(ImageClassifier):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    def set_current_step_from_epoch(self, iter: int, max_iters: int) -> None:
+    def set_current_step_from_iter(self, iter: int, max_iters: int) -> None:
         """Set current step from iterations.
 
         This is called from hooks like `PassStepInfoHook`.
-        Mainly used to updated unsupervised loss weight.
+        Mainly used to update loss weights.
         """
 
         # directly use iter and max_iters from runner

@@ -91,6 +91,7 @@ class DirichletMSELoss(nn.Module):
     def forward(self, alpha, label, step: int, max_steps: int, **kwargs):
         # FIXME: for now we don't have `weight` and custom `reduction`
 
+        # lower kl divergence regularization term during the initial training phase
         lamb = min(1, float(step) / max_steps)
 
         return evidential_classification(alpha, label, lamb=lamb)

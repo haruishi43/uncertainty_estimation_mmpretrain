@@ -1,10 +1,19 @@
 # dataset settings
 dataset_type = "MNIST"
+
+# NOTE: the Runner automatically merges `data_preprocessor` to `model`
 data_preprocessor = dict(mean=[33.46], std=[78.87], num_classes=10)
 
-pipeline = [dict(type="Resize", scale=32), dict(type="PackInputs")]
+pipeline = [
+    dict(type="Resize", scale=32),
+    dict(type="PackInputs"),
+]
 
-common_data_cfg = dict(type=dataset_type, data_prefix="data/mnist", pipeline=pipeline)
+common_data_cfg = dict(
+    type=dataset_type,
+    data_prefix="data/mnist",
+    pipeline=pipeline,
+)
 
 train_dataloader = dict(
     batch_size=128,
