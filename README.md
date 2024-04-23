@@ -13,6 +13,11 @@ The project introduces:
 - modular implementation compatible with `mmpretrain`, enabling easy integration with other models and datasets
 - various evidence functions (e.g. softplus, exponential, etc.)
 
+Future work:
+- Implement other uncertainty estimation methods (e.g. MC dropout, Ensembles, DDU, etc...)
+- Add uncertainty metrics to quantify the methods
+- Benchmark
+
 ## Installation
 
 Install `torch` (with gpu-support).
