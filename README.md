@@ -76,6 +76,8 @@ For example, when I used the Adam optimizer for training, the model accuracy imp
 
 ### CIFAR-5 Experiments
 
+Instead of LeNet5, I used ResNet18 for CIFAR-5 experiments.
+
 ![alt text](.readme/uncertainty_accuracy_plot.png)
 
 ![alt text](.readme/ecdf.png)
