@@ -74,6 +74,11 @@ For example, when I used the Adam optimizer for training, the model accuracy imp
 | `exp(tanh(x) / tau)` | ![alt text](.readme/rotate_exptanh_model.png) |
 
 
+### CIFAR-5 Experiments
+
+![alt text](.readme/uncertainty_accuracy_plot.png)
+
+![alt text](.readme/ecdf.png)
 
 ## Acknowledgement
 
