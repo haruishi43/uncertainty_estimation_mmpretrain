@@ -28,9 +28,7 @@ custom_hooks = [
 ]
 
 # optimizer
-optim_wrapper = dict(
-    optimizer=dict(type="AdamW", lr=0.001)
-)
+optim_wrapper = dict(optimizer=dict(type="AdamW", lr=0.001))
 
 # learning policy
 param_scheduler = dict(

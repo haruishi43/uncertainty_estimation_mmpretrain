@@ -37,6 +37,7 @@ def _exp_tanh(x: torch.Tensor, tau: float = 0.1):
     """
     return torch.exp(torch.tanh(x) / tau)
 
+
 class Dirichlet(nn.Module):
     def __init__(
         self,

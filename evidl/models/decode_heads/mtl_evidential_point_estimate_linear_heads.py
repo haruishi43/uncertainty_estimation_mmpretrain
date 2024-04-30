@@ -54,22 +54,7 @@ class LinearBlock(BaseModule):
 
 
 @MODELS.register_module()
-class EvidentialStackedLinearClsHead(ClsHead):
-    """Stacked Linear Classifier head with Dirichlet output.
-
-    Args:
-        num_classes (int): Number of categories.
-        in_channels (int): Number of channels in the input feature map.
-        mid_channels (Sequence[int]): Number of channels in the hidden fc
-            layers.
-        dropout_rate (float): Dropout rate after each hidden fc layer,
-            except the last layer. Defaults to 0.
-        norm_cfg (dict, optional): Config dict of normalization layer after
-            each hidden fc layer, except the last layer. Defaults to None.
-        act_cfg (dict, optional): Config dict of activation function after each
-            hidden layer, except the last layer. Defaults to use "ReLU".
-    """
-
+class MTLEvidentialStackedLinearClsHead(ClsHead):
     def __init__(
         self,
         num_classes: int,
@@ -122,6 +107,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
             self.num_classes,
             evidence_function=self.evidence_func,
         )
+        self.final
 
     def pre_logits(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
         """The process before the final classification head.
@@ -153,9 +139,6 @@ class EvidentialStackedLinearClsHead(ClsHead):
         **kwargs,
     ) -> dict:
         alpha = self(feats)
-        S = alpha.sum(dim=1, keepdim=True)
-        # evidence = alpha - 1
-        # beta = S - self.num_classes
 
         # Unpack data samples and pack targets
         if "gt_score" in data_samples[0]:
@@ -206,150 +189,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
         # or belief
         pred_scores = alpha / S
 
-        # epistemic uncertainty
-        pred_uncerts = self.num_classes / S
-
-        # predicted labels
-        # pred_labels = alpha.argmax(dim=1, keepdim=True).detach()
-        # TODO: softmax prediction?
-        pred_labels = torch.softmax(pred_scores, dim=1)
-
-        out_data_samples = []
-        if data_samples is None:
-            data_samples = [None for _ in range(pred_scores.size(0))]
-
-        for data_sample, score, uncert, label in zip(
-            data_samples,
-            pred_scores,
-            pred_uncerts,
-            pred_labels,
-        ):
-            if data_sample is None:
-                data_sample = DataSample()
-
-            data_sample.set_pred_score(score).set_pred_label(label)
-
-            # NOTE add uncertainty as a custom filed
-            data_sample.set_field(
-                uncert,
-                "uncertainty",
-                dtype=torch.Tensor,
-            )
-
-            out_data_samples.append(data_sample)
-        return out_data_samples
-
-
-# TODO: Make a base EDL head later since the basic functions are the same and
-# I'm repeating myself.
-
-
-@MODELS.register_module()
-class EvidentialLinearClsHead(ClsHead):
-    def __init__(
-        self,
-        num_classes: int,
-        in_channels: int,
-        evidence_func: str = "softplus",
-        init_cfg: Optional[dict] = dict(type="Normal", layer="Linear", std=0.01),
-        **kwargs,
-    ) -> None:
-        super().__init__(init_cfg=init_cfg, **kwargs)
-
-        self.in_channels = in_channels
-        self.num_classes = num_classes
-        self.evidence_func = evidence_func
-
-        if self.num_classes <= 0:
-            raise ValueError(f"num_classes={num_classes} must be a positive integer")
-
-        self.dirichlet = Dirichlet(
-            self.in_channels,
-            self.num_classes,
-            evidence_function=self.evidence_func,
-        )
-
-    def pre_logits(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
-        """The process before the final classification head.
-
-        The input ``feats`` is a tuple of tensor, and each tensor is the
-        feature of a backbone stage. In ``LinearClsHead``, we just obtain the
-        feature of the last stage.
-        """
-        # The LinearClsHead doesn't have other module, just return after
-        # unpacking.
-        return feats[-1]
-
-    def forward(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
-        """The forward process."""
-        pre_logits = self.pre_logits(feats)
-        # The final classification head.
-        alpha = self.dirichlet(pre_logits)
-        return alpha
-
-    def loss(
-        self,
-        feats: Tuple[torch.Tensor],
-        data_samples: List[DataSample],
-        step: int,
-        max_steps: int,
-        **kwargs,
-    ) -> dict:
-        alpha = self(feats)
-        S = alpha.sum(dim=1, keepdim=True)
-        # evidence = alpha - 1
-        # beta = S - self.num_classes
-
-        # Unpack data samples and pack targets
-        if "gt_score" in data_samples[0]:
-            # Batch augmentation may convert labels to one-hot format scores.
-            target = torch.stack([i.gt_score for i in data_samples])
-        else:
-            target = torch.cat([i.gt_label for i in data_samples])
-
-        # compute loss
-        losses = dict()
-
-        # evidential loss
-        loss = self.loss_module(
-            alpha,
-            target,
-            avg_factor=alpha.size(0),
-            step=step,
-            max_steps=max_steps,
-            **kwargs,
-        )
-        losses["loss"] = loss
-
-        # compute accuracy
-        if self.cal_acc:
-            assert target.ndim == 1, (
-                "If you enable batch augmentation "
-                "like mixup during training, `cal_acc` is pointless."
-            )
-            acc = Accuracy.calculate(alpha, target, topk=self.topk)
-            losses.update({f"accuracy_top-{k}": a for k, a in zip(self.topk, acc)})
-
-        return losses
-
-    def predict(
-        self,
-        feats: Tuple[torch.Tensor],
-        data_samples: Optional[List[Optional[DataSample]]] = None,
-    ) -> List[DataSample]:
-        alpha = self(feats)
-        predictions = self._get_predictions(alpha, data_samples)
-        return predictions
-
-    def _get_predictions(self, alpha, data_samples):
-
-        alpha = alpha.detach()
-        S = alpha.sum(dim=1, keepdim=True)
-        # this is actually a normalized probability map
-        # or belief
-        pred_scores = alpha / S
-
-        # epistemic uncertainty
+        # uncertainty
         pred_uncerts = self.num_classes / S
 
         # predicted labels
