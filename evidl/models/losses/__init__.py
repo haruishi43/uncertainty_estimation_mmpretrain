@@ -5,9 +5,11 @@ from .orig_edl_losses import (
     DirichletNLLLoss,
     DirichletDigammaLoss,
 )
+from .relaxed_edl_losses import RelaxedDirichletMSELoss
 
 __all__ = [
     "DirichletMSELoss",
     "DirichletNLLLoss",
     "DirichletDigammaLoss",
+    "RelaxedDirichletMSELoss",
 ]

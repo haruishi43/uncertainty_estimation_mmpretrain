@@ -2,7 +2,7 @@
 
 Experiments for Evidential Deep Learning (EDL)
 
-The paper can be accessed at [arXiv](http://arxiv.org/abs/1806.01768).
+The original EDL paper can be accessed at [arXiv](http://arxiv.org/abs/1806.01768).
 
 The goals of this project are:
 - to reproduce the results of the paper
@@ -12,6 +12,8 @@ The goals of this project are:
 The project introduces:
 - modular implementation compatible with `mmpretrain`, enabling easy integration with other models and datasets
 - various evidence functions (e.g. softplus, exponential, etc.)
+- various loss functions (e.g. MSE, NLL, etc.)
+- novel formulations (e.g. R-EDL)
 
 Future work:
 - Implement other uncertainty estimation methods (e.g. MC dropout, Ensembles, DDU, etc...)
