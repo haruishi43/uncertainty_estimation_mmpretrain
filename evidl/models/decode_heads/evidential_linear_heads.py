@@ -205,19 +205,18 @@ class EvidentialStackedLinearClsHead(ClsHead):
 
         evidence = evidence.detach()
         alpha = evidence + self.lamb
+        num_classes = alpha.size(1)
 
         S = alpha.sum(dim=1, keepdim=True)
-        # this is actually a normalized probability map
-        # or belief
         pred_scores = alpha / S
 
         # epistemic uncertainty
-        pred_uncerts = self.num_classes / S
+        pred_uncerts = (self.lamb * num_classes) / S
 
         # predicted labels
-        # pred_labels = alpha.argmax(dim=1, keepdim=True).detach()
+        pred_labels = alpha.argmax(dim=1, keepdim=True)
         # TODO: softmax prediction?
-        pred_labels = torch.softmax(pred_scores, dim=1)
+        # pred_labels = torch.softmax(pred_scores, dim=1)
 
         out_data_samples = []
         if data_samples is None:
@@ -353,17 +352,14 @@ class EvidentialLinearClsHead(ClsHead):
         evidence = evidence.detach()
         alpha = evidence + self.lamb
         S = alpha.sum(dim=1, keepdim=True)
-        # this is actually a normalized probability map
-        # or belief
         pred_scores = alpha / S
 
         # epistemic uncertainty
-        pred_uncerts = self.num_classes / S
+        pred_uncerts = self.lamb * self.num_classes / S
 
         # predicted labels
-        # pred_labels = alpha.argmax(dim=1, keepdim=True).detach()
-        # TODO: softmax prediction?
-        pred_labels = torch.softmax(pred_scores, dim=1)
+        pred_labels = alpha.argmax(dim=1, keepdim=True)
+        # pred_labels = torch.softmax(pred_scores, dim=1)
 
         out_data_samples = []
         if data_samples is None:
