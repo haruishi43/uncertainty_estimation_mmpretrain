@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from mmpretrain.registry import MODELS
 
 
-def dirichlet_nll_loss(alpha, y):
+def dirichlet_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Negative Log Likelihood Loss.
 
     Eq. (3) from https://arxiv.org/abs/1806.01768
@@ -21,7 +21,7 @@ def dirichlet_nll_loss(alpha, y):
     return value.mean()
 
 
-def dirichlet_digamma_loss(alpha, y):
+def dirichlet_digamma_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Digamma Loss.
 
     Eq. (4) from https://arxiv.org/abs/1806.01768
@@ -35,7 +35,7 @@ def dirichlet_digamma_loss(alpha, y):
     return value.mean()
 
 
-def dirichlet_mse_loss(alpha, y):
+def dirichlet_mse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Sum of Squares Loss.
 
     Eq. (5) from https://arxiv.org/abs/1806.01768
@@ -48,7 +48,7 @@ def dirichlet_mse_loss(alpha, y):
     return mse.mean()
 
 
-def kl_div_reg(alpha, y):
+def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """KL Divergence Regularization.
 
     KL div of predicted parameters from unifrom Dirichlet distribution.
@@ -72,14 +72,6 @@ def kl_div_reg(alpha, y):
     return kl.mean()
 
 
-def evidential_classification(
-    alpha: torch.Tensor, y: torch.Tensor, lamb: float = 1.0
-) -> torch.Tensor:
-    num_classes = alpha.shape[-1]
-    y = F.one_hot(y, num_classes)
-    return dirichlet_mse_loss(alpha, y) + lamb * kl_div_reg(alpha, y)
-
-
 @MODELS.register_module()
 class DirichletMSELoss(nn.Module):
     """Dirichlet MSELoss."""
@@ -88,13 +80,24 @@ class DirichletMSELoss(nn.Module):
         super().__init__()
         self.loss_weight = loss_weight
 
-    def forward(self, alpha, label, step: int, max_steps: int, **kwargs):
+    def forward(
+        self,
+        evidence: torch.Tensor,
+        label: torch.Tensor,
+        step: int,
+        max_steps: int,
+        lamb: float = 1.0,
+        **kwargs,
+    ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
 
         # lower kl divergence regularization term during the initial training phase
-        lamb = min(1, float(step) / max_steps)
+        kl_weight = min(1, float(step) / max_steps)
+        num_classes = evidence.shape[-1]
 
-        return evidential_classification(alpha, label, lamb=lamb)
+        alpha = evidence + lamb
+        y = F.one_hot(label, num_classes)
+        return dirichlet_mse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
 
 
 @MODELS.register_module()
@@ -105,14 +108,22 @@ class DirichletNLLLoss(nn.Module):
         super().__init__()
         self.loss_weight = loss_weight
 
-    def forward(self, alpha, label, step: int, max_steps: int, **kwargs):
+    def forward(
+        self,
+        evidence: torch.Tensor,
+        label: torch.Tensor,
+        step: int,
+        max_steps: int,
+        lamb: float = 1.0,
+        **kwargs,
+    ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
+        num_classes = evidence.shape[-1]
+        kl_weight = min(1, float(step) / max_steps)
 
-        lamb = min(1, float(step) / max_steps)
-
-        num_classes = alpha.shape[-1]
+        alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_mse_loss(alpha, y) + lamb * kl_div_reg(alpha, y)
+        return dirichlet_mse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
 
 
 @MODELS.register_module()
@@ -123,11 +134,19 @@ class DirichletDigammaLoss(nn.Module):
         super().__init__()
         self.loss_weight = loss_weight
 
-    def forward(self, alpha, label, step: int, max_steps: int, **kwargs):
+    def forward(
+        self,
+        evidence: torch.Tensor,
+        label: torch.Tensor,
+        step: int,
+        max_steps: int,
+        lamb: float = 1.0,
+        **kwargs,
+    ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
+        kl_weight = min(1, float(step) / max_steps)
+        num_classes = evidence.shape[-1]
 
-        lamb = min(1, float(step) / max_steps)
-
-        num_classes = alpha.shape[-1]
+        alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_digamma_loss(alpha, y) + lamb * kl_div_reg(alpha, y)
+        return dirichlet_digamma_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)

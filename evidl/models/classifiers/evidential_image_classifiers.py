@@ -33,6 +33,18 @@ class EvidentialImageClassifier(ImageClassifier):
         self.max_steps = max_iters
         self.step_frac = iter / max_iters
 
+    def set_current_step_from_epoch(self, epoch: int, max_epochs: int) -> None:
+        """Set current step from epochs.
+
+        This is called from hooks like `PassStepInfoHook`.
+        Mainly used to update loss weights.
+        """
+
+        # directly use epoch and max_epochs from runner
+        self.step = epoch
+        self.max_steps = max_epochs
+        self.step_frac = epoch / max_epochs
+
     def loss(self, inputs: torch.Tensor, data_samples: List[DataSample]) -> dict:
         feats = self.extract_feat(inputs)
         return self.head.loss(

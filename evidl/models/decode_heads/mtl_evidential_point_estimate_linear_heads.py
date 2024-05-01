@@ -26,7 +26,7 @@ class LinearBlock(BaseModule):
         norm_cfg=None,
         act_cfg=None,
         init_cfg=None,
-    ):
+    ) -> None:
         super().__init__(init_cfg=init_cfg)
         self.fc = nn.Linear(in_channels, out_channels)
 
@@ -61,6 +61,7 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
         in_channels: int,
         mid_channels: Sequence[int],
         evidence_func: str = "softplus",
+        lamb: float = 1.0,
         dropout_rate: float = 0.0,
         norm_cfg: Optional[Dict] = None,
         act_cfg: Optional[Dict] = dict(type="ReLU"),
@@ -80,6 +81,7 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
         self.mid_channels = mid_channels
 
         self.evidence_func = evidence_func
+        self.lamb = lamb
         self.dropout_rate = dropout_rate
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
@@ -125,10 +127,8 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
     def forward(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
         """The forward process."""
         pre_logits = self.pre_logits(feats)
-
-        # We output the alpha values which is the "evidence + 1"
-        alpha = self.dirichlet(pre_logits)
-        return alpha
+        evidence = self.dirichlet(pre_logits)
+        return evidence
 
     def loss(
         self,
@@ -138,7 +138,7 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
         max_steps: int,
         **kwargs,
     ) -> dict:
-        alpha = self(feats)
+        evidence: torch.Tensor = self(feats)
 
         # Unpack data samples and pack targets
         if "gt_score" in data_samples[0]:
@@ -152,14 +152,18 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
 
         # evidential loss
         loss = self.loss_module(
-            alpha,
+            evidence,
             target,
-            avg_factor=alpha.size(0),
+            avg_factor=evidence.size(0),
             step=step,
             max_steps=max_steps,
+            lamb=self.lamb,
             **kwargs,
         )
         losses["loss"] = loss
+
+        alpha = evidence + self.lamb
+        prob = alpha / alpha.sum(dim=1, keepdim=True)
 
         # compute accuracy
         if self.cal_acc:
@@ -167,7 +171,7 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
                 "If you enable batch augmentation "
                 "like mixup during training, `cal_acc` is pointless."
             )
-            acc = Accuracy.calculate(alpha, target, topk=self.topk)
+            acc = Accuracy.calculate(prob, target, topk=self.topk)
             losses.update({f"accuracy_top-{k}": a for k, a in zip(self.topk, acc)})
 
         return losses
@@ -177,13 +181,14 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
         feats: Tuple[torch.Tensor],
         data_samples: Optional[List[Optional[DataSample]]] = None,
     ) -> List[DataSample]:
-        alpha = self(feats)
-        predictions = self._get_predictions(alpha, data_samples)
+        evidence = self(feats)
+        predictions = self._get_predictions(evidence, data_samples)
         return predictions
 
-    def _get_predictions(self, alpha, data_samples):
+    def _get_predictions(self, evidence, data_samples):
 
-        alpha = alpha.detach()
+        evidence = evidence.detach()
+        alpha = evidence + self.lamb
         S = alpha.sum(dim=1, keepdim=True)
         # this is actually a normalized probability map
         # or belief

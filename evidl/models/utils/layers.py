@@ -64,5 +64,8 @@ class Dirichlet(nn.Module):
 
     def forward(self, x):
         out = self.fc(x)
-        alpha = self.func_evidence(out) + 1
-        return alpha
+
+        # The main functionality of the model is to calculate the evidence.
+        # Calculating alpha and other outputs should be done elsewhere.
+        evidence = self.func_evidence(out)
+        return evidence

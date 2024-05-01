@@ -73,6 +73,10 @@ For example, when I used the Adam optimizer for training, the model accuracy imp
 | `exp(x)` (clamped) | ![alt text](.readme/rotate_exp_model.png) |
 | `exp(tanh(x) / tau)` | ![alt text](.readme/rotate_exptanh_model.png) |
 
+### Different Loss Functions
+
+WIP
+
 
 ### CIFAR-5 Experiments
 
