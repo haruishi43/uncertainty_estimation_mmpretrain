@@ -42,10 +42,15 @@ def dirichlet_mse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """
     sum_alpha = alpha.sum(-1, keepdims=True)
     p = alpha / sum_alpha
+
+    # supervision (mse) term
     t1 = (y - p).pow(2).sum(-1)
+
+    # variance term
     t2 = ((p * (1 - p)) / (sum_alpha + 1)).sum(-1)
-    mse = t1 + t2
-    return mse.mean()
+
+    loss = t1 + t2
+    return loss.mean()
 
 
 def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
