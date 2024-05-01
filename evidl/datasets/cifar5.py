@@ -7,6 +7,7 @@ from mmpretrain.datasets import CIFAR10
 
 
 CIFAR5_CATEGORIES = ("airplane", "automobile", "bird", "cat", "deer")
+LAST_5_CATEGORIES = ("dog", "frog", "horse", "ship", "truck")
 
 
 @DATASETS.register_module()
@@ -21,8 +22,12 @@ class CIFAR5(CIFAR10):
 
     def __init__(
         self,
+        use_unseen_classes: bool = False,
         **kwargs,
     ) -> None:
+        self.use_unseen_classes = use_unseen_classes
+        if use_unseen_classes:
+            self.METAINFO = {"classes": LAST_5_CATEGORIES}
         super().__init__(**kwargs)
 
     def filter_data(self) -> List[dict]:
@@ -33,7 +38,11 @@ class CIFAR5(CIFAR10):
 
         data_list = []
         for data in self.data_list:
-            if data["gt_label"] < 5:
-                data_list.append(data)
+            if self.use_unseen_classes:
+                if data["gt_label"] >= 5:
+                    data_list.append(data)
+            else:
+                if data["gt_label"] < 5:
+                    data_list.append(data)
 
         return data_list
