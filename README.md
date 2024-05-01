@@ -77,15 +77,30 @@ For example, when I used the Adam optimizer for training, the model accuracy imp
 
 ### Different Loss Functions
 
-WIP
+Implemented `MSE`, `NLL`, and `digamma` loss functions for classification task.
+Follwing the original paper, the default loss function used in the project is `MSE`.
+However, I've experimented with the other loss functions as well.
+
+| Loss Function | Rotated One Experiment |
+| ---------- | -------- |
+| `MSE` | ![alt text](.readme/rotate_edl_model.png) |
+| `NLL` | ![alt text](.readme/rotate_nll_model.png) |
+| `Digamma` | ![alt text](.readme/rotate_digamma_model.png) |
+| `Relaxed MSE` | ![alt text](.readme/rotate_redl_model.png) |
+
+Note that `NLL` and `Digamma` does not work as well as `MSE` as touched in the paper.
+`Relaxed MSE` is introduced in the R-EDL (ICLR2024) paper.
+It still needs a little bit of debugging since the uncertainties seem to exceed 1 in some cases.
 
 
 ### CIFAR-5 Experiments
 
 Instead of LeNet5, I used ResNet18 for CIFAR-5 experiments.
 
+Uncertainty thresholded accuracy plot:
 ![alt text](.readme/uncertainty_accuracy_plot.png)
 
+Empirical Cumulative Distribution Function (ECDF) of the uncertainty estimates:
 ![alt text](.readme/ecdf.png)
 
 ## Acknowledgement
