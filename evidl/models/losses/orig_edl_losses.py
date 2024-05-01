@@ -22,7 +22,7 @@ def dirichlet_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 
 
 def dirichlet_digamma_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-    """Digamma Loss.
+    """Digamma Loss (Cross-Entropy Loss with Dirichlet Distribution).
 
     Eq. (4) from https://arxiv.org/abs/1806.01768
     """
