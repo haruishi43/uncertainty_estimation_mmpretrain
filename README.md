@@ -90,7 +90,6 @@ However, I've experimented with the other loss functions as well.
 
 Note that `NLL` and `Digamma` does not work as well as `MSE` as touched in the paper.
 `Relaxed MSE` is introduced in the R-EDL (ICLR2024) paper.
-It still needs a little bit of debugging since the uncertainties seem to exceed 1 in some cases.
 
 
 ### CIFAR-5 Experiments
