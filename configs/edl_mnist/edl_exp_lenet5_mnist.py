@@ -19,7 +19,7 @@ model = dict(
         in_channels=120,
         mid_channels=[84],
         evidence_func="exp",
-        loss=dict(type="DirichletMSELoss"),
+        loss=dict(type="DirichletSSELoss"),
     ),
 )
 

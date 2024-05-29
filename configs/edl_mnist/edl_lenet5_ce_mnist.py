@@ -18,7 +18,7 @@ model = dict(
         num_classes=10,
         in_channels=120,
         mid_channels=[84],
-        loss=dict(type="DirichletDigammaLoss"),
+        loss=dict(type="DirichletCELoss"),
     ),
 )
 

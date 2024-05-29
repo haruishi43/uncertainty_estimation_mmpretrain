@@ -15,9 +15,6 @@ class PredictiveDistributionECDF(BaseMetric):
     The CDF function is binned by the entropy (x-axis) and the values are
     the maximum probability of the predictive distribution (y-axis).
 
-    For either binary classification or multi-class classification, the
-    accuracy is the fraction of correct predictions in all predictions:
-
     Args:
         collect_device (str): Device name used for collecting results from
             different ranks during distributed training. Must be 'cpu' or

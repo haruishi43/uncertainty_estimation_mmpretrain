@@ -19,7 +19,7 @@ model = dict(
         in_channels=120,
         mid_channels=[84],
         lamb=1.0,
-        loss=dict(type="RelaxedDirichletMSELoss"),
+        loss=dict(type="RelaxedDirichletSSELoss"),
     ),
 )
 

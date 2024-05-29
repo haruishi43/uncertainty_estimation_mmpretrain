@@ -12,7 +12,7 @@ The goals of this project are:
 The project introduces:
 - modular implementation compatible with `mmpretrain`, enabling easy integration with other models and datasets
 - various evidence functions (e.g. softplus, exponential, etc.)
-- various loss functions (e.g. MSE, NLL, etc.)
+- various loss functions (e.g. SSE, NLL, etc.)
 - novel formulations (e.g. R-EDL)
 
 Future work:
@@ -77,19 +77,19 @@ For example, when I used the Adam optimizer for training, the model accuracy imp
 
 ### Different Loss Functions
 
-Implemented `MSE`, `NLL`, and `digamma` loss functions for classification task.
-Follwing the original paper, the default loss function used in the project is `MSE`.
+Implemented `SSE`, `NLL`, and `CE` loss functions for classification task.
+Follwing the original paper, the default loss function used in the project is `SSE`.
 However, I've experimented with the other loss functions as well.
 
 | Loss Function | Rotated One Experiment |
 | ---------- | -------- |
-| `MSE` | ![alt text](.readme/rotate_edl_model.png) |
+| `SSE` | ![alt text](.readme/rotate_edl_model.png) |
 | `NLL` | ![alt text](.readme/rotate_nll_model.png) |
-| `Digamma` | ![alt text](.readme/rotate_digamma_model.png) |
-| `Relaxed MSE` | ![alt text](.readme/rotate_redl_model.png) |
+| `CE` | ![alt text](.readme/rotate_ce_model.png) |
+| `Relaxed SSE` | ![alt text](.readme/rotate_redl_model.png) |
 
-Note that `NLL` and `Digamma` does not work as well as `MSE` as touched in the paper.
-`Relaxed MSE` is introduced in the R-EDL (ICLR2024) paper.
+Note that `NLL` and `CE` does not work as well as `SSE` as touched in the paper.
+`Relaxed SSE` is introduced in the R-EDL (ICLR2024) paper.
 
 
 ### CIFAR-5 Experiments

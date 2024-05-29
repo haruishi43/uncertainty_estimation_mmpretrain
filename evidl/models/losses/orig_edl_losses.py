@@ -21,8 +21,8 @@ def dirichlet_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return value.mean()
 
 
-def dirichlet_digamma_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-    """Digamma Loss (Cross-Entropy Loss with Dirichlet Distribution).
+def dirichlet_ce_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    """Cross-Entropy Loss with Dirichlet Distribution.
 
     Eq. (4) from https://arxiv.org/abs/1806.01768
     """
@@ -35,7 +35,7 @@ def dirichlet_digamma_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor
     return value.mean()
 
 
-def dirichlet_mse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+def dirichlet_sse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Sum of Squares Loss.
 
     Eq. (5) from https://arxiv.org/abs/1806.01768
@@ -43,7 +43,7 @@ def dirichlet_mse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     sum_alpha = alpha.sum(-1, keepdims=True)
     p = alpha / sum_alpha
 
-    # supervision (mse) term
+    # supervision (sse) term
     t1 = (y - p).pow(2).sum(-1)
 
     # variance term
@@ -78,8 +78,8 @@ def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 
 
 @MODELS.register_module()
-class DirichletMSELoss(nn.Module):
-    """Dirichlet MSELoss."""
+class DirichletSSELoss(nn.Module):
+    """Dirichlet SSELoss."""
 
     def __init__(self, loss_weight: float = 1.0):
         super().__init__()
@@ -102,7 +102,7 @@ class DirichletMSELoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_mse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return dirichlet_sse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
 
 
 @MODELS.register_module()
@@ -128,12 +128,12 @@ class DirichletNLLLoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_mse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return dirichlet_nll_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
 
 
 @MODELS.register_module()
-class DirichletDigammaLoss(nn.Module):
-    """Dirichlet Digamma Loss."""
+class DirichletCELoss(nn.Module):
+    """Dirichlet Cross-Entropy Loss."""
 
     def __init__(self, loss_weight: float = 1.0):
         super().__init__()
@@ -154,4 +154,4 @@ class DirichletDigammaLoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_digamma_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return dirichlet_ce_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)

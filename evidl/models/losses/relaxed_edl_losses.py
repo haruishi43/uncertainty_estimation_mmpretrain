@@ -10,13 +10,13 @@ from mmpretrain.registry import MODELS
 from .orig_edl_losses import kl_div_reg
 
 
-def relaxed_mse_loss(
+def relaxed_sse_loss(
     evidence: torch.Tensor,
     y: torch.Tensor,
     lamb1: float = 1.0,
     lamb2: float = 1.0,
 ) -> torch.Tensor:
-    """Relaxed MSE loss from R-EDL.
+    """Relaxed SSE loss from R-EDL.
 
     `lamb1` is set to 1.0 in the original implementation.
     `lamb2` is flexible in the range of 0.1 to 1.0 and 0.1 was chosen
@@ -29,13 +29,13 @@ def relaxed_mse_loss(
 
     gap = y - (evidence + lamb2) / denom
 
-    loss_mse = gap.pow(2).sum(-1)
-    return loss_mse.mean()
+    loss_sse = gap.pow(2).sum(-1)
+    return loss_sse.mean()
 
 
 @MODELS.register_module()
-class RelaxedDirichletMSELoss(nn.Module):
-    """Dirichlet MSE Loss for R-EDL."""
+class RelaxedDirichletSSELoss(nn.Module):
+    """Dirichlet SSE Loss for R-EDL."""
 
     def __init__(self, loss_weight: float = 1.0, lamb: int = 1.0) -> None:
         super().__init__()
@@ -60,7 +60,7 @@ class RelaxedDirichletMSELoss(nn.Module):
         y = F.one_hot(label, num_classes)
         alpha = evidence + lamb
 
-        mse = relaxed_mse_loss(evidence, y, lamb1=self.d_lamb, lamb2=lamb)
+        sse = relaxed_sse_loss(evidence, y, lamb1=self.d_lamb, lamb2=lamb)
         kl = kl_div_reg(alpha, y)
 
-        return mse + kl_weight * kl
+        return sse + kl_weight * kl
