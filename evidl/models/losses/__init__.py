@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 from .orig_edl_losses import (
-    DirichletSSELoss,
-    DirichletNLLLoss,
-    DirichletDigammaLoss,
+    EDLSSELoss,
+    EDLNLLLoss,
+    EDLCELoss,
 )
-from .relaxed_edl_losses import RelaxedDirichletSSELoss
+from .relaxed_edl_losses import RelaxedEDLSSELoss
 
 __all__ = [
-    "DirichletSSELoss",
-    "DirichletNLLLoss",
-    "DirichletDigammaLoss",
-    "RelaxedDirichletSSELoss",
+    "EDLSSELoss",
+    "EDLNLLLoss",
+    "EDLCELoss",
+    "RelaxedEDLSSELoss",
 ]

@@ -10,7 +10,7 @@ from mmpretrain.registry import MODELS
 from .orig_edl_losses import kl_div_reg
 
 
-def relaxed_sse_loss(
+def relaxed_edl_sse_loss(
     evidence: torch.Tensor,
     y: torch.Tensor,
     lamb1: float = 1.0,
@@ -34,8 +34,8 @@ def relaxed_sse_loss(
 
 
 @MODELS.register_module()
-class RelaxedDirichletSSELoss(nn.Module):
-    """Dirichlet SSE Loss for R-EDL."""
+class RelaxedEDLSSELoss(nn.Module):
+    """SSE Loss for R-EDL."""
 
     def __init__(self, loss_weight: float = 1.0, lamb: int = 1.0) -> None:
         super().__init__()
@@ -60,7 +60,7 @@ class RelaxedDirichletSSELoss(nn.Module):
         y = F.one_hot(label, num_classes)
         alpha = evidence + lamb
 
-        sse = relaxed_sse_loss(evidence, y, lamb1=self.d_lamb, lamb2=lamb)
+        sse = relaxed_edl_sse_loss(evidence, y, lamb1=self.d_lamb, lamb2=lamb)
         kl = kl_div_reg(alpha, y)
 
         return sse + kl_weight * kl

@@ -8,7 +8,7 @@ from mmengine import MessageHub
 from mmpretrain.registry import MODELS
 
 
-def dirichlet_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+def edl_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Negative Log Likelihood Loss.
 
     Eq. (3) from https://arxiv.org/abs/1806.01768
@@ -22,7 +22,7 @@ def dirichlet_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return value.mean()
 
 
-def dirichlet_ce_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+def edl_ce_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Cross-Entropy Loss with Dirichlet Distribution.
 
     Eq. (4) from https://arxiv.org/abs/1806.01768
@@ -36,7 +36,7 @@ def dirichlet_ce_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return value.mean()
 
 
-def dirichlet_sse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+def edl_sse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """Sum of Squares Loss.
 
     Eq. (5) from https://arxiv.org/abs/1806.01768
@@ -87,8 +87,8 @@ def get_curr_iter_info():
 
 
 @MODELS.register_module()
-class DirichletSSELoss(nn.Module):
-    """Dirichlet SSELoss."""
+class EDLSSELoss(nn.Module):
+    """SSE Loss for EDL."""
 
     def __init__(self, loss_weight: float = 1.0):
         super().__init__()
@@ -110,12 +110,12 @@ class DirichletSSELoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_sse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return edl_sse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
 
 
 @MODELS.register_module()
-class DirichletNLLLoss(nn.Module):
-    """Dirichlet NLL Loss."""
+class EDLNLLLoss(nn.Module):
+    """NLL Loss for EDL."""
 
     def __init__(self, loss_weight: float = 1.0):
         super().__init__()
@@ -136,12 +136,12 @@ class DirichletNLLLoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_nll_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return edl_nll_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
 
 
 @MODELS.register_module()
-class DirichletCELoss(nn.Module):
-    """Dirichlet Cross-Entropy Loss."""
+class EDLCELoss(nn.Module):
+    """Cross-Entropy Loss for EDL."""
 
     def __init__(self, loss_weight: float = 1.0):
         super().__init__()
@@ -161,4 +161,4 @@ class DirichletCELoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return dirichlet_ce_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return edl_ce_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)

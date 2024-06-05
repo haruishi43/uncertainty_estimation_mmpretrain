@@ -19,6 +19,6 @@ model = dict(
         type="EvidentialLinearClsHead",
         num_classes=5,
         in_channels=512,
-        loss=dict(type="DirichletSSELoss"),
+        loss=dict(type="EDLSSELoss"),
     ),
 )
