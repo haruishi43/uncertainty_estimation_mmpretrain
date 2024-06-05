@@ -23,10 +23,6 @@ model = dict(
     ),
 )
 
-custom_hooks = [
-    dict(type="PassStepInfoHook"),
-]
-
 # optimizer
 optim_wrapper = dict(optimizer=dict(type="AdamW", lr=0.001))
 

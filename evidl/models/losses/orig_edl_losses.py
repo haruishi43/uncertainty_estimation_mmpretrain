@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from mmengine import MessageHub
 from mmpretrain.registry import MODELS
 
 
@@ -77,6 +78,14 @@ def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return kl.mean()
 
 
+def get_curr_iter_info():
+    """Get current iteration and max iterations from the message hub."""
+    message_hub = MessageHub.get_current_instance()
+    curr_iter = message_hub.get_info("iter")
+    max_iters = message_hub.get_info("max_iters")
+    return curr_iter, max_iters
+
+
 @MODELS.register_module()
 class DirichletSSELoss(nn.Module):
     """Dirichlet SSELoss."""
@@ -89,14 +98,13 @@ class DirichletSSELoss(nn.Module):
         self,
         evidence: torch.Tensor,
         label: torch.Tensor,
-        step: int,
-        max_steps: int,
         lamb: float = 1.0,
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
 
         # lower kl divergence regularization term during the initial training phase
+        step, max_steps = get_curr_iter_info()
         kl_weight = min(1, float(step) / max_steps)
         num_classes = evidence.shape[-1]
 
@@ -117,12 +125,12 @@ class DirichletNLLLoss(nn.Module):
         self,
         evidence: torch.Tensor,
         label: torch.Tensor,
-        step: int,
-        max_steps: int,
         lamb: float = 1.0,
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
+
+        step, max_steps = get_curr_iter_info()
         num_classes = evidence.shape[-1]
         kl_weight = min(1, float(step) / max_steps)
 
@@ -143,12 +151,11 @@ class DirichletCELoss(nn.Module):
         self,
         evidence: torch.Tensor,
         label: torch.Tensor,
-        step: int,
-        max_steps: int,
         lamb: float = 1.0,
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
+        step, max_steps = get_curr_iter_info()
         kl_weight = min(1, float(step) / max_steps)
         num_classes = evidence.shape[-1]
 

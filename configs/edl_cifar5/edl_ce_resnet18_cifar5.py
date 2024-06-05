@@ -22,7 +22,3 @@ model = dict(
         loss=dict(type="DirichletCELoss"),
     ),
 )
-
-custom_hooks = [
-    dict(type="PassStepInfoHook"),
-]
