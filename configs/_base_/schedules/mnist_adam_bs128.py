@@ -20,4 +20,4 @@ test_cfg = dict()
 
 # NOTE: `auto_scale_lr` is for automatically scaling LR
 # based on the actual training batch size.
-auto_scale_lr = dict(base_batch_size=1000)
+# auto_scale_lr = dict(base_batch_size=1000)

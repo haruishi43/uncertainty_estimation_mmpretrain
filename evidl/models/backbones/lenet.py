@@ -40,6 +40,7 @@ class ModernLeNet5(BaseBackbone):
                 out_channels=6,
                 kernel_size=5,
                 stride=1,
+                # padding=2,
                 act_cfg=act_cfg,
                 conv_cfg=conv_cfg,
                 norm_cfg=norm_cfg,

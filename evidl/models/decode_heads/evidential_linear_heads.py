@@ -150,8 +150,6 @@ class EvidentialStackedLinearClsHead(ClsHead):
         self,
         feats: Tuple[torch.Tensor],
         data_samples: List[DataSample],
-        step: int,
-        max_steps: int,
         **kwargs,
     ) -> dict:
         evidence: torch.Tensor = self(feats)
@@ -171,8 +169,6 @@ class EvidentialStackedLinearClsHead(ClsHead):
             evidence,
             target,
             avg_factor=evidence.size(0),
-            step=step,
-            max_steps=max_steps,
             lamb=self.lamb,
             **kwargs,
         )
@@ -297,8 +293,6 @@ class EvidentialLinearClsHead(ClsHead):
         self,
         feats: Tuple[torch.Tensor],
         data_samples: List[DataSample],
-        step: int,
-        max_steps: int,
         **kwargs,
     ) -> dict:
         evidence: torch.Tensor = self(feats)
@@ -318,8 +312,6 @@ class EvidentialLinearClsHead(ClsHead):
             evidence,
             target,
             avg_factor=evidence.size(0),
-            step=step,
-            max_steps=max_steps,
             **kwargs,
         )
         losses["loss"] = loss

@@ -4,6 +4,8 @@ _base_ = [
     "../_base_/default_runtime.py",
 ]
 
+randomness = dict(seed=0)
+
 # dataset config
 train_dataloader = dict(batch_size=128)
 val_dataloader = dict(batch_size=128)
@@ -19,6 +21,7 @@ model = dict(
         type="EvidentialLinearClsHead",
         num_classes=5,
         in_channels=512,
+        evidence_func="exp_tanh",
         loss=dict(type="EDLCELoss"),
     ),
 )

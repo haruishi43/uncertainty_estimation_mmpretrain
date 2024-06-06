@@ -134,8 +134,6 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
         self,
         feats: Tuple[torch.Tensor],
         data_samples: List[DataSample],
-        step: int,
-        max_steps: int,
         **kwargs,
     ) -> dict:
         evidence: torch.Tensor = self(feats)
@@ -155,8 +153,6 @@ class MTLEvidentialStackedLinearClsHead(ClsHead):
             evidence,
             target,
             avg_factor=evidence.size(0),
-            step=step,
-            max_steps=max_steps,
             lamb=self.lamb,
             **kwargs,
         )

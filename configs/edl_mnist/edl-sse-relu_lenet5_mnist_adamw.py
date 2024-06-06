@@ -5,6 +5,7 @@ _base_ = [
 ]
 
 # baseline (default) configuration
+randomness = dict(seed=0)
 
 model = dict(
     type="EvidentialImageClassifier",
@@ -24,7 +25,9 @@ model = dict(
 )
 
 # optimizer
-optim_wrapper = dict(optimizer=dict(type="AdamW", lr=0.001))
+optim_wrapper = dict(
+    optimizer=dict(type="AdamW", lr=0.002, weight_decay=0.005),
+)
 
 # learning policy
 param_scheduler = dict(

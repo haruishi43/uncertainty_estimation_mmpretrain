@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mmengine import MessageHub
 from mmpretrain.registry import MODELS
+from evidl.models.utils import get_curr_iter_info
 
 
 def edl_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
@@ -78,19 +78,11 @@ def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return kl.mean()
 
 
-def get_curr_iter_info():
-    """Get current iteration and max iterations from the message hub."""
-    message_hub = MessageHub.get_current_instance()
-    curr_iter = message_hub.get_info("iter")
-    max_iters = message_hub.get_info("max_iters")
-    return curr_iter, max_iters
-
-
 @MODELS.register_module()
 class EDLSSELoss(nn.Module):
     """SSE Loss for EDL."""
 
-    def __init__(self, loss_weight: float = 1.0):
+    def __init__(self, loss_weight: float = 1.0) -> None:
         super().__init__()
         self.loss_weight = loss_weight
 

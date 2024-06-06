@@ -8,6 +8,7 @@ import torch.nn.functional as F
 
 from mmpretrain.registry import MODELS
 from .orig_edl_losses import kl_div_reg
+from evidl.models.utils import get_curr_iter_info
 
 
 def relaxed_edl_sse_loss(
@@ -46,14 +47,14 @@ class RelaxedEDLSSELoss(nn.Module):
         self,
         evidence: torch.Tensor,
         label: torch.Tensor,
-        step: int,
-        max_steps: int,
         lamb: float = 1.0,
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
 
         # lower kl divergence regularization term during the initial training phase
+        step, max_steps = get_curr_iter_info()
+        num_classes = evidence.shape[-1]
         kl_weight = min(1, float(step) / max_steps)
 
         num_classes = evidence.shape[-1]
