@@ -88,8 +88,9 @@ However, I've experimented with the other loss functions as well.
 | `CE` | ![alt text](.readme/rotate_ce_model.png) |
 | `Relaxed SSE` | ![alt text](.readme/rotate_redl_model.png) |
 
-Note that `NLL` and `CE` does not work as well as `SSE` as touched in the paper.
-`Relaxed SSE` is introduced in the R-EDL (ICLR2024) paper.
+Note that choosing the loss function also requires choosing the right evidence function.
+For example, it is said that `SSE` works well with `softplus` (and maybe `relu`), while `CE` works well with `exp`.
+Recent applications to CV tasks have shown that `CE` works well with `exp(tanh(x) / tau)`.
 
 
 ### CIFAR-5 Experiments
