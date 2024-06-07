@@ -19,7 +19,7 @@ model = dict(
         type="EvidentialLinearClsHead",
         num_classes=10,
         in_channels=500,
-        evidence_func="relu",
-        loss=dict(type="EDLSSELoss"),
+        evidence_func="exp",
+        loss=dict(type="EDLCELoss"),
     ),
 )

@@ -1,6 +1,6 @@
 _base_ = [
     "../_base_/datasets/mnist_bs128.py",
-    "../_base_/schedules/mnist_sgd_bs128.py",
+    "../_base_/schedules/mnist_sgd.py",
     "../_base_/default_runtime.py",
 ]
 
@@ -18,7 +18,7 @@ model = dict(
         num_classes=10,
         in_channels=120,
         mid_channels=[84],
-        evidence_func="exp",
-        loss=dict(type="EDLNLLLoss"),
+        evidence_func="softplus",
+        loss=dict(type="EDLCELoss"),
     ),
 )

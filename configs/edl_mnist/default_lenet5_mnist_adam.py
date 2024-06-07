@@ -1,4 +1,5 @@
 _base_ = [
+    # "../_base_/models/lenet5.py",
     "../_base_/datasets/mnist_bs1000.py",
     "../_base_/schedules/mnist_adam.py",
     "../_base_/default_runtime.py",
@@ -6,20 +7,19 @@ _base_ = [
 
 # baseline (default) configuration
 
+# model settings
 model = dict(
-    type="EvidentialImageClassifier",
+    type="ImageClassifier",
     backbone=dict(
         type="ModernLeNet5",
         flattened=True,
         channels=[20, 50, 500],
+        num_classes=10,
         act_cfg=dict(type="ReLU"),
     ),
     neck=None,
     head=dict(
-        type="EvidentialLinearClsHead",
-        num_classes=10,
-        in_channels=500,
-        evidence_func="relu",
-        loss=dict(type="EDLSSELoss"),
+        type="ClsHead",
+        loss=dict(type="CrossEntropyLoss", loss_weight=1.0),
     ),
 )

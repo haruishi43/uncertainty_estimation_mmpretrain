@@ -77,7 +77,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
         mid_channels: Sequence[int],
         evidence_func: str = "softplus",
         lamb: float = 1.0,
-        dropout_rate: float = 0.0,
+        dropout_ratio: float = 0.0,
         norm_cfg: Optional[Dict] = None,
         act_cfg: Optional[Dict] = dict(type="ReLU"),
         **kwargs,
@@ -97,7 +97,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
 
         self.evidence_func = evidence_func
         self.lamb = lamb
-        self.dropout_rate = dropout_rate
+        self.dropout_rate = dropout_ratio
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
 
@@ -123,6 +123,7 @@ class EvidentialStackedLinearClsHead(ClsHead):
             self.mid_channels[-1],
             self.num_classes,
             evidence_function=self.evidence_func,
+            dropout_ratio=0.5,
         )
 
     def pre_logits(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
@@ -269,6 +270,7 @@ class EvidentialLinearClsHead(ClsHead):
             self.in_channels,
             self.num_classes,
             evidence_function=self.evidence_func,
+            dropout_ratio=0.5,
         )
 
     def pre_logits(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
@@ -285,6 +287,8 @@ class EvidentialLinearClsHead(ClsHead):
     def forward(self, feats: Tuple[torch.Tensor]) -> torch.Tensor:
         """The forward process."""
         pre_logits = self.pre_logits(feats)
+        if len(pre_logits.shape) == 4:
+            pre_logits = pre_logits.squeeze()
         # The final classification head.
         evidence = self.dirichlet(pre_logits)
         return evidence

@@ -45,8 +45,13 @@ class Dirichlet(nn.Module):
         num_classes: int,
         evidence_function: str = "softplus",
         clip_value: float = 10.0,
+        dropout_ratio: float = 0.1,
     ) -> None:
         super().__init__()
+        if dropout_ratio:
+            self.dropout = nn.Dropout(p=dropout_ratio)
+        else:
+            self.dropout = None
         self.fc = nn.Linear(in_channels, num_classes)
         self.num_classes = num_classes
 
@@ -56,13 +61,15 @@ class Dirichlet(nn.Module):
         elif evidence_function == "exp":
             self.func_evidence = partial(_clip_exp, clip_value=clip_value)
         elif evidence_function == "relu":
-            self.func_evidence = F.relu
+            self.func_evidence = nn.ReLU()
         elif evidence_function == "exp_tanh":
             self.func_evidence = partial(_exp_tanh, tau=0.25)
         else:
             raise ValueError(f"Unknown evidence function: {evidence_function}")
 
     def forward(self, x):
+        if self.dropout:
+            x = self.dropout(x)
         out = self.fc(x)
 
         # The main functionality of the model is to calculate the evidence.

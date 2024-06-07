@@ -41,16 +41,17 @@ def edl_sse_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 
     Eq. (5) from https://arxiv.org/abs/1806.01768
     """
-    sum_alpha = alpha.sum(-1, keepdims=True)
+    sum_alpha = alpha.sum(-1, keepdim=True)
     p = alpha / sum_alpha
 
     # supervision (sse) term
-    t1 = (y - p).pow(2).sum(-1)
+    t1 = (y - p).pow(2).sum(-1, keepdim=True)
 
     # variance term
-    t2 = ((p * (1 - p)) / (sum_alpha + 1)).sum(-1)
+    t2 = ((p * (1 - p)) / (sum_alpha + 1)).sum(-1, keepdim=True)
 
     loss = t1 + t2
+    # print(loss.shape, loss.mean().shape)
     return loss.mean()
 
 
@@ -66,15 +67,15 @@ def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     # uniform dirichlet distribution
     beta = torch.ones_like(alpha)
 
-    sum_alpha = alpha.sum(-1)
-    sum_beta = beta.sum(-1)
+    sum_alpha = alpha.sum(-1, keepdim=True)
+    sum_beta = beta.sum(-1, keepdim=True)
 
     t1 = sum_alpha.lgamma() - sum_beta.lgamma()
-    t2 = (alpha.lgamma() - beta.lgamma()).sum(-1)
+    t2 = (alpha.lgamma() - beta.lgamma()).sum(-1, keepdim=True)
     t3 = alpha - beta
     t4 = alpha.digamma() - sum_alpha.digamma().unsqueeze(-1)
 
-    kl = t1 - t2 + (t3 * t4).sum(-1)
+    kl = t1 - t2 + (t3 * t4).sum(-1, keepdim=True)
     return kl.mean()
 
 
@@ -96,8 +97,9 @@ class EDLSSELoss(nn.Module):
         # FIXME: for now we don't have `weight` and custom `reduction`
 
         # lower kl divergence regularization term during the initial training phase
-        step, max_steps = get_curr_iter_info()
+        step, max_steps = get_curr_iter_info(epoch=True)
         kl_weight = min(1, float(step) / max_steps)
+        kl_weight = min(1, float(step) / 10)
         num_classes = evidence.shape[-1]
 
         alpha = evidence + lamb

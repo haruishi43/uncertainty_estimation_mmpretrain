@@ -49,44 +49,45 @@ python tools/train.py configs/edl_mnist/edl_lenet5_mnist.py
 
 ### Visualization
 
-Checkout `notebooks/exp_edl_mnist.ipynb` to visualize the results.
+Checkout `notebooks/exp_edl_mnist_*.ipynb` to visualize the results.
 
 
 ## Experiments
 
+See [mnist_benchmarks.md](.readme/mnist_benchmarks.md) for the results of the experiments on MNIST dataset.
+
 ### Experiments in the paper
 
-Used `softplus` as the evidence function.
+Used `SSE` loss with `relu` as the evidence function.
 
 | Experiment | Softmax  | Evidential Deep Learning |
 | ---------- | -------- | -------- |
-| Rotate "1" | ![alt text](.readme/rotate_deterministic_model.png) | ![alt text](.readme/rotate_edl_model.png) |
-| Classify "1" | ![alt text](.readme/one_deterministic_model.png) | ![alt text](.readme/one_edl_model.png) |
-| Classify "Yoda" | ![alt text](.readme/yoda_deterministic_model.png) | ![alt text](.readme/yoda_edl_model.png) |
+| Rotate "1" | ![alt text](.assets/rotate_1_deterministic.png) | ![alt text](.assets/rotate_1_edl-sse-relu.png) |
+| Classify "1" | ![alt text](.assets/classify_1_deterministic.png) | ![alt text](.assets/classify_1_edl-sse-relu.png) |
+| Classify "Yoda" | ![alt text](.assets/classify_yoda_deterministic.png) | ![alt text](.assets/classify_yoda_edl-sse-relu.png) |
 
-I've noticed that EDL is very sensitive to how it is trained.
-For example, when I used the Adam optimizer for training, the model accuracy improves, but the uncertainty estimates are not as good as when I used SGD.
 
 ### Different Evidence Functions
 
 | Evidence Function | Rotated One Experiment |
-| ---------- | -------- |
-| `relu(x)` | ![alt text](.readme/rotate_relu_model.png) |
-| `exp(x)` (clamped) | ![alt text](.readme/rotate_exp_model.png) |
-| `exp(tanh(x) / tau)` | ![alt text](.readme/rotate_exptanh_model.png) |
+| ----------------- | ---------------------- |
+| `relu(x)`         | ![alt text](.readme/rotate_1_edl-sse-relu.png) |
+| `softplus(x)`     | ![alt text](.readme/rotate_1_edl-sse-softplus.png) |
+| `exp(x)` (clamped) | ![alt text](.readme/rotate_1_edl-sse-exp.png) |
+| `exp(tanh(x) / tau)` | ![alt text](.readme/rotate_1_edl-sse-etanh.png) |
 
 ### Different Loss Functions
 
 Implemented `SSE`, `NLL`, and `CE` loss functions for classification task.
-Follwing the original paper, the default loss function used in the project is `SSE`.
+Following the original paper, the default loss function used in the project is `SSE`.
 However, I've experimented with the other loss functions as well.
 
 | Loss Function | Rotated One Experiment |
 | ---------- | -------- |
-| `SSE` | ![alt text](.readme/rotate_edl_model.png) |
-| `NLL` | ![alt text](.readme/rotate_nll_model.png) |
-| `CE` | ![alt text](.readme/rotate_ce_model.png) |
-| `Relaxed SSE` | ![alt text](.readme/rotate_redl_model.png) |
+| `SSE` (`relu`) | ![alt text](.readme/rotate_1_edl-sse-relu.png) |
+| `NLL` (`exp`) | ![alt text](.readme/rotate_1_edl-nll-exp.png) |
+| `CE` (`exp`) | ![alt text](.readme/rotate_1_edl-ce-exp.png) |
+| `Relaxed SSE` (`softplus`) | ![alt text](.readme/rotate_1_redl-sse-softplus.png) |
 
 Note that choosing the loss function also requires choosing the right evidence function.
 For example, it is said that `SSE` works well with `softplus` (and maybe `relu`), while `CE` works well with `exp`.

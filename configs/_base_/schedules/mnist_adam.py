@@ -2,7 +2,8 @@
 optim_wrapper = dict(
     optimizer=dict(
         type="Adam",
-        lr=0.1,
+        lr=0.001,
+        weight_decay=0.005,  # add l2 regularization
     ),
 )
 # learning policy
@@ -14,7 +15,7 @@ param_scheduler = dict(
 )
 
 # train, val, test setting
-train_cfg = dict(by_epoch=True, max_epochs=10, val_interval=1)
+train_cfg = dict(by_epoch=True, max_epochs=30, val_interval=1)
 val_cfg = dict()
 test_cfg = dict()
 
