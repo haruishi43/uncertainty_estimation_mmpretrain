@@ -3,8 +3,8 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 
-from evidl.models.utils.layers import NormalInvGamma
-from evidl.models.utils.losses import evidential_regression
+from pineberry.models.utils.layers import NormalInvGamma
+from pineberry.models.utils.losses import evidential_regression
 
 
 # re-create toy y = x ** 3 + eps example from https://arxiv.org/abs/1910.02600

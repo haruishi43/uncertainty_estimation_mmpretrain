@@ -19,7 +19,7 @@ force_grid_wrap = false
 include_trailing_comma = true
 ensure_newline_before_comments=true
 use_parentheses = true
-known_first_party = evidl
+known_first_party = pineberry
 [*.ipynb]
 indent_size = 4
 include_trailing_comma = true

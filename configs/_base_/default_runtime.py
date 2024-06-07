@@ -2,7 +2,7 @@
 default_scope = "mmpretrain"
 
 # add custom import path
-custom_imports = dict(imports=["evidl"], allow_failed_imports=False)
+custom_imports = dict(imports=["pineberry"], allow_failed_imports=False)
 
 # configure default hooks
 default_hooks = dict(

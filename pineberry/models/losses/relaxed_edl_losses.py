@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 """Implementations of R-EDL losses."""
 
@@ -8,7 +7,7 @@ import torch.nn.functional as F
 
 from mmpretrain.registry import MODELS
 from .orig_edl_losses import kl_div_reg
-from evidl.models.utils import get_curr_iter_info
+from pineberry.models.utils import get_curr_iter_info
 
 
 def relaxed_edl_sse_loss(

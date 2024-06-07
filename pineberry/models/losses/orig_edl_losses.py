@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmpretrain.registry import MODELS
-from evidl.models.utils import get_curr_iter_info
+from pineberry.models.utils import get_curr_iter_info
 
 
 def edl_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
