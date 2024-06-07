@@ -99,9 +99,11 @@ Recent applications to CV tasks have shown that `CE` works well with `exp(tanh(x
 Instead of LeNet5, I used ResNet18 for CIFAR-5 experiments.
 
 Uncertainty thresholded accuracy plot:
+
 ![alt text](assets/uncertainty_accuracy_plot.png)
 
 Empirical Cumulative Distribution Function (ECDF) of the uncertainty estimates:
+
 ![alt text](assets/ecdf.png)
 
 ## Acknowledgement
