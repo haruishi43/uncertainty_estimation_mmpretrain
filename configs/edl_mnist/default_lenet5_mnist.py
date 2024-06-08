@@ -1,5 +1,5 @@
 _base_ = [
-    # "../_base_/models/lenet5.py",
+    "../_base_/models/lenet5.py",
     "../_base_/datasets/mnist_bs1000.py",
     "../_base_/schedules/mnist_adam.py",
     "../_base_/default_runtime.py",

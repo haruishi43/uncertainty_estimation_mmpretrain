@@ -29,7 +29,6 @@ class ModernLeNet5(BaseBackbone):
         self,
         num_classes: int = -1,
         channels: List[int] = [6, 16, 120],
-        mid_channels: int = 84,
         flattened: bool = False,
         act_cfg: dict = dict(type="ReLU"),
         conv_cfg: dict = dict(type="Conv2d"),

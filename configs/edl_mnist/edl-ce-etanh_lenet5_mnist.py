@@ -1,10 +1,8 @@
 _base_ = [
     "../_base_/datasets/mnist_bs1000.py",
-    "../_base_/schedules/mnist_adam.py",
+    "../_base_/schedules/mnist_bs1000.py",
     "../_base_/default_runtime.py",
 ]
-
-# baseline (default) configuration
 
 model = dict(
     type="EvidentialImageClassifier",
@@ -16,10 +14,16 @@ model = dict(
     ),
     neck=None,
     head=dict(
-        type="EvidentialLinearClsHead",
+        type="EDLClsHead",
         num_classes=10,
         in_channels=500,
-        evidence_func="relu",
-        loss=dict(type="EDLSSELoss"),
+        loss=[
+            dict(type="EDLCELoss", loss_weight=1.0),
+            dict(type="EDLKLDivLoss", loss_weight=1.0),
+        ],
+        edl_layer=dict(
+            type="DirichletLayer",
+            evidence_function="exp_tanh",
+        ),
     ),
 )

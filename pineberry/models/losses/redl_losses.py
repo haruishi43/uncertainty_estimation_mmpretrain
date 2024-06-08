@@ -5,8 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmpretrain.registry import MODELS
-from .orig_edl_losses import kl_div_reg
-from pineberry.models.utils import get_curr_iter_info
 
 
 def relaxed_edl_sse_loss(
@@ -36,10 +34,16 @@ def relaxed_edl_sse_loss(
 class RelaxedEDLSSELoss(nn.Module):
     """SSE Loss for R-EDL."""
 
-    def __init__(self, loss_weight: float = 1.0, lamb: int = 1.0) -> None:
+    def __init__(
+        self,
+        lamb: int = 1.0,
+        loss_weight: float = 1.0,
+        loss_name: str = "redl_sse_loss",
+    ) -> None:
         super().__init__()
-        self.loss_weight = loss_weight
         self.d_lamb = lamb
+        self.loss_weight = loss_weight
+        self._loss_name = loss_name
 
     def forward(
         self,
@@ -49,17 +53,11 @@ class RelaxedEDLSSELoss(nn.Module):
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
-
-        # lower kl divergence regularization term during the initial training phase
-        step, max_steps = get_curr_iter_info()
-        num_classes = evidence.shape[-1]
-        kl_weight = min(1, float(step) / max_steps)
-
         num_classes = evidence.shape[-1]
         y = F.one_hot(label, num_classes)
-        alpha = evidence + lamb
-
         sse = relaxed_edl_sse_loss(evidence, y, lamb1=self.d_lamb, lamb2=lamb)
-        kl = kl_div_reg(alpha, y)
+        return self.loss_weight * sse
 
-        return sse + kl_weight * kl
+    @property
+    def loss_name(self):
+        return self._loss_name

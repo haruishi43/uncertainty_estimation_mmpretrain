@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmpretrain.registry import MODELS
-from pineberry.models.utils import get_curr_iter_info
+from pineberry.utils import get_curr_iter_info
 
 
 def edl_nll_loss(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
@@ -83,9 +83,14 @@ def kl_div_reg(alpha: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 class EDLSSELoss(nn.Module):
     """SSE Loss for EDL."""
 
-    def __init__(self, loss_weight: float = 1.0) -> None:
+    def __init__(
+        self,
+        loss_weight: float = 1.0,
+        loss_name: str = "edl_sse_loss",
+    ) -> None:
         super().__init__()
         self.loss_weight = loss_weight
+        self._loss_name = loss_name
 
     def forward(
         self,
@@ -95,25 +100,28 @@ class EDLSSELoss(nn.Module):
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
-
-        # lower kl divergence regularization term during the initial training phase
-        step, max_steps = get_curr_iter_info(epoch=True)
-        kl_weight = min(1, float(step) / max_steps)
-        kl_weight = min(1, float(step) / 10)
         num_classes = evidence.shape[-1]
-
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return edl_sse_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return self.loss_weight * edl_sse_loss(alpha, y)
+
+    @property
+    def loss_name(self):
+        return self._loss_name
 
 
 @MODELS.register_module()
 class EDLNLLLoss(nn.Module):
     """NLL Loss for EDL."""
 
-    def __init__(self, loss_weight: float = 1.0):
+    def __init__(
+        self,
+        loss_weight: float = 1.0,
+        loss_name: str = "edl_nll_loss",
+    ) -> None:
         super().__init__()
         self.loss_weight = loss_weight
+        self._loss_name = loss_name
 
     def forward(
         self,
@@ -123,23 +131,60 @@ class EDLNLLLoss(nn.Module):
         **kwargs,
     ) -> torch.Tensor:
         # FIXME: for now we don't have `weight` and custom `reduction`
-
-        step, max_steps = get_curr_iter_info()
         num_classes = evidence.shape[-1]
-        kl_weight = min(1, float(step) / max_steps)
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return edl_nll_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return self.loss_weight * edl_nll_loss(alpha, y)
+
+    @property
+    def loss_name(self):
+        return self._loss_name
 
 
 @MODELS.register_module()
 class EDLCELoss(nn.Module):
     """Cross-Entropy Loss for EDL."""
 
-    def __init__(self, loss_weight: float = 1.0):
+    def __init__(
+        self,
+        loss_weight: float = 1.0,
+        loss_name: str = "edl_ce_loss",
+    ) -> None:
         super().__init__()
         self.loss_weight = loss_weight
+        self._loss_name = loss_name
+
+    def forward(
+        self,
+        evidence: torch.Tensor,
+        label: torch.Tensor,
+        lamb: float = 1.0,
+        **kwargs,
+    ) -> torch.Tensor:
+        # FIXME: for now we don't have `weight` and custom `reduction`
+        num_classes = evidence.shape[-1]
+        alpha = evidence + lamb
+        y = F.one_hot(label, num_classes)
+        return self.loss_weight * edl_ce_loss(alpha, y)
+
+    @property
+    def loss_name(self):
+        return self._loss_name
+
+
+@MODELS.register_module()
+class EDLKLDivLoss(nn.Module):
+    """KL Divergence Loss for EDL."""
+
+    def __init__(
+        self,
+        loss_weight: float = 1.0,
+        loss_name: str = "edl_kldiv_reg",
+    ) -> None:
+        super().__init__()
+        self.loss_weight = loss_weight
+        self._loss_name = loss_name
 
     def forward(
         self,
@@ -155,4 +200,8 @@ class EDLCELoss(nn.Module):
 
         alpha = evidence + lamb
         y = F.one_hot(label, num_classes)
-        return edl_ce_loss(alpha, y) + kl_weight * kl_div_reg(alpha, y)
+        return self.loss_weight * kl_weight * kl_div_reg(alpha, y)
+
+    @property
+    def loss_name(self):
+        return self._loss_name

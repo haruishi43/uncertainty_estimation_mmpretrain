@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-from .metrics import (
-    PredictiveDistributionECDF,
-    UncertaintyThresholdedAccuracy,
-)
+from .accuracy import UncertaintyThresholdedAccuracy
+from .ecdf import PredictiveDistributionECDF
 
 __all__ = [
     "PredictiveDistributionECDF",

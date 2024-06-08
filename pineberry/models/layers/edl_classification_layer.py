@@ -1,35 +1,21 @@
 #!/usr/bin/env python3
 
 from functools import partial
+from typing import Optional
 
 import torch
 from torch import nn
 import torch.nn.functional as F
 
-
-class NormalInvGamma(nn.Module):
-    def __init__(self, in_features, out_units):
-        super().__init__()
-        self.dense = nn.Linear(in_features, out_units * 4)
-        self.out_units = out_units
-
-    def evidence(self, x):
-        return F.softplus(x)
-
-    def forward(self, x):
-        out = self.dense(x)
-        mu, logv, logalpha, logbeta = torch.split(out, self.out_units, dim=-1)
-        v = self.evidence(logv)
-        alpha = self.evidence(logalpha) + 1
-        beta = self.evidence(logbeta)
-        return mu, v, alpha, beta
+from mmengine.model import BaseModule
+from mmpretrain.registry import MODELS
 
 
-def _clip_exp(x: torch.Tensor, clip_value: float = 10.0):
+def _clip_exp(x: torch.Tensor, clip_value: float = 10.0) -> torch.Tensor:
     return torch.exp(torch.clamp(x, min=-clip_value, max=clip_value))
 
 
-def _exp_tanh(x: torch.Tensor, tau: float = 0.1):
+def _exp_tanh(x: torch.Tensor, tau: float = 0.1) -> torch.Tensor:
     """Exponential tanh function introduced in image caption retrieval.
 
     `tau` is a scaling factor between 0 and 1, and is usually set to
@@ -38,22 +24,36 @@ def _exp_tanh(x: torch.Tensor, tau: float = 0.1):
     return torch.exp(torch.tanh(x) / tau)
 
 
-class Dirichlet(nn.Module):
+@MODELS.register_module()
+class DirichletLayer(BaseModule):
+    """Dirichlet Layer for EDL.
+
+    Args:
+        in_channels (int): Number of channels in the input tensor.
+        out_channels (int): Number of channels in the output tensor.
+        evidence_function (str): Evidence function. Defaults to 'softplus'.
+        clip_value (float): Value to clip the exponential function. Defaults to 10.0.
+        dropout_ratio (float): Dropout ratio. Defaults to 0.5.
+        init_cfg (dict, optional): The config to control the initialization.
+            Defaults to None.
+    """
+
     def __init__(
         self,
         in_channels: int,
-        num_classes: int,
+        out_channels: int,
         evidence_function: str = "softplus",
         clip_value: float = 10.0,
-        dropout_ratio: float = 0.1,
+        dropout_ratio: float = 0.5,
+        init_cfg: Optional[dict] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(init_cfg=init_cfg)
         if dropout_ratio:
             self.dropout = nn.Dropout(p=dropout_ratio)
         else:
             self.dropout = None
-        self.fc = nn.Linear(in_channels, num_classes)
-        self.num_classes = num_classes
+        self.fc = nn.Linear(in_channels, out_channels)
+        self.num_classes = out_channels
 
         # evidence functions
         if evidence_function == "softplus":
@@ -61,13 +61,14 @@ class Dirichlet(nn.Module):
         elif evidence_function == "exp":
             self.func_evidence = partial(_clip_exp, clip_value=clip_value)
         elif evidence_function == "relu":
-            self.func_evidence = nn.ReLU()
+            self.func_evidence = F.relu
         elif evidence_function == "exp_tanh":
             self.func_evidence = partial(_exp_tanh, tau=0.25)
         else:
             raise ValueError(f"Unknown evidence function: {evidence_function}")
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward function."""
         if self.dropout:
             x = self.dropout(x)
         out = self.fc(x)
@@ -75,4 +76,5 @@ class Dirichlet(nn.Module):
         # The main functionality of the model is to calculate the evidence.
         # Calculating alpha and other outputs should be done elsewhere.
         evidence = self.func_evidence(out)
+
         return evidence

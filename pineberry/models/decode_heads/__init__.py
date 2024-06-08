@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-from .evidential_linear_heads import (
-    EvidentialStackedLinearClsHead,
-    EvidentialLinearClsHead,
-)
+from .base_edl_head import EDLClsHead
+from .stacked_linear_edl_head import StackedLinearEDLClsHead
 
 __all__ = [
-    "EvidentialStackedLinearClsHead",
-    "EvidentialLinearClsHead",
+    "EDLClsHead",
+    "StackedLinearEDLClsHead",
 ]

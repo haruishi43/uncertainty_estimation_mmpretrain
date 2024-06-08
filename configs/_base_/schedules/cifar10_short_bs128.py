@@ -2,6 +2,9 @@
 optim_wrapper = dict(
     optimizer=dict(type="SGD", lr=0.1, momentum=0.9, weight_decay=0.0001)
 )
+# optim_wrapper = dict(
+#     optimizer=dict(type="Adam", lr=0.001, weight_decay=0.005)
+# )
 # learning policy
 param_scheduler = dict(
     type="MultiStepLR", by_epoch=True, milestones=[25, 40], gamma=0.1
