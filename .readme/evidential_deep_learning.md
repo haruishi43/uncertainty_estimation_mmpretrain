@@ -54,7 +54,7 @@ Checkout `notebooks/exp_edl_mnist_*.ipynb` to visualize the results.
 
 ## Experiments
 
-See [mnist_benchmarks.md](../.readme /mnist_benchmarks.md) for the results of the experiments on MNIST dataset.
+See [edl_mnist_benchmarks.md](.readme/edl_mnist_benchmarks.md) for the results of the experiments on MNIST dataset.
 
 ### Experiments in the paper
 

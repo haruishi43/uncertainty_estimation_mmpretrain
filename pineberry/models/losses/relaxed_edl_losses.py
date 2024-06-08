@@ -1,4 +1,3 @@
-
 """Implementations of R-EDL losses."""
 
 import torch
