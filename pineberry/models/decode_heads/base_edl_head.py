@@ -22,11 +22,11 @@ class EDLClsHead(BaseModule):
     Args:
         loss (dict, list): Config of classification loss. Defaults to
             ``dict(type='CrossEntropyLoss', loss_weight=1.0)``.
-        topk (int | Tuple[int]): Top-k accuracy. Defaults to ``(1, )``.
         cal_acc (bool): Whether to calculate accuracy during training.
             If you use batch augmentations like Mixup and CutMix during
             training, it is pointless to calculate accuracy.
             Defaults to False.
+        topk (int | Tuple[int]): Top-k accuracy. Defaults to ``(1, )``.
         init_cfg (dict, optional): the config to control the initialization.
             Defaults to None.
     """
@@ -39,8 +39,9 @@ class EDLClsHead(BaseModule):
             dict(type="EDLSSELoss", loss_weight=1.0),
             dict(type="EDLKLDivLoss", loss_weight=1.0),
         ],
-        topk: Union[int, Tuple[int]] = (1,),
         cal_acc: bool = False,
+        topk: Union[int, Tuple[int]] = (1,),
+        cal_uncert: bool = False,
         edl_layer: dict = dict(
             type="DirichletLayer",
             evidence_function="softplus",

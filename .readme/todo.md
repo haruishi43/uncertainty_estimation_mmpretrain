@@ -17,10 +17,13 @@
 - [ ] NatPN
 
 ## Metrics
-- [ ] ECE
-- [ ] Entropy
+- [x] ECE, aECE
+- [x] Brier Score
+- [x] NLL
+- [x] Entropy
 - [ ] Mutual Information
 - [ ] Disagreement
+- [ ] AURC
 
 ## Tasks/Datasets
 - [ ] Semantic Segmentation
