@@ -21,9 +21,9 @@
 - [x] Brier Score
 - [x] NLL
 - [x] Entropy
-- [ ] Mutual Information
-- [ ] Disagreement
-- [ ] AURC
+- [x] Mutual Information
+- [x] Disagreement
+- [x] AURC (and other risk-based metrics)
 
 ## Tasks/Datasets
 - [ ] Semantic Segmentation
